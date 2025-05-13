@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    h1, h2, h3 {
+      margin: 0;
+    }
+    .card {
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .nav {
+      display: flex;
+      background-color: #34495e;
+      margin-bottom: 20px;
+    }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      padding: 15px 20px;
+      transition: background-color 0.3s ease;
+    }
+    .nav a:hover {
+      background-color: #2c3e50;
+    }
+    .nav a.active {
+      background-color: #3498db;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+    }
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .button {
+      padding: 12px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      text-align: center;
+    }
+    .button:hover {
+      background-color: #2980b9;
+    }
+    .button.stop {
+      background-color: #e74c3c;
+    }
+    .button.stop:hover {
+      background-color: #c0392b;
+    }
+    .button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    .status-container {
+      margin-top: 20px;
+    }
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .status-label {
+      font-weight: bold;
+    }
+    .progress-container {
+      margin-top: 10px;
+      background-color: #ecf0f1;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 20px;
+      background-color: #3498db;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .activity-container {
+      margin-top: 20px;
+    }
+    .activity-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .activity-table th, .activity-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .activity-table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    .activity-table tr:hover {
+      background-color: #f5f5f5;
+    }
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .error {
+      color: #e74c3c;
+      margin-top: 10px;
+    }
+    .keyword-highlight {
+      background-color: #ffe6e6;
+      color: #e74c3c;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .screenshot-container {
+      margin-top: 20px;
+    }
+    .screenshot-item {
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .screenshot-header {
+      background-color: #f2f2f2;
+      padding: 10px 15px;
+      border-bottom: 1px solid #ddd;
+    }
+    .screenshot-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><%= title %></h1>
+      <p>fileis.com 웹하드 컨텐츠 모니터링</p>
+    </div>
+  </header>
+  
+  <div class="container">
+    <div class="nav">
+      <a href="/">홈</a>
+      <a href="/status">상태</a>
+      <a href="/monitoring" class="active">실시간 모니터링</a>
+      <a href="/search">키워드 검색</a>
+    </div>
+    
+    <div class="grid-container">
+      <div class="card">
+        <h2>모니터링 제어</h2>
+        <div class="control-panel">
+          <div style="margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 5px;">
+            <h3 style="margin-top: 0; margin-bottom: 10px;">모니터링 옵션</h3>
+            
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">
+                <input type="checkbox" id="stealthMode" checked> 
+                스텔스 모드 (브라우저 창 숨김)
+              </label>
+              <small style="color: #666;">체크 해제시 브라우저 창이 표시됩니다.</small>
+            </div>
+            
+            <div>
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;" for="pageCount">
+                각 카테고리별 수집할 페이지 수:
+              </label>
+              <input type="number" id="pageCount" min="1" max="10" value="2" style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <small style="color: #666; display: block; margin-top: 5px;">각 카테고리별 모니터링할 리스트 페이지 수 (1~10)</small>
+            </div>
+          </div>
+          
+          <button id="startButton" class="button">모니터링 시작</button>
+          <button id="stopButton" class="button stop" disabled>모니터링 중지</button>
+          <div class="status-container">
+            <h3>모니터링 상태</h3>
+            <div class="status-item">
+              <span class="status-label">상태:</span>
+              <span id="monitoringStatus">대기 중</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">진행 상황:</span>
+              <span id="progressText">0%</span>
+            </div>
+            <div class="progress-container">
+              <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <div class="status-item">
+              <span class="status-label">총 컨텐츠:</span>
+              <span id="totalContent">0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">키워드 발견:</span>
+              <span id="keywordFound">0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">시작 시간:</span>
+              <span id="startTime">-</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">종료 시간:</span>
+              <span id="endTime">-</span>
+            </div>
+            <div id="errorContainer" class="error" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>모니터링 활동</h2>
+        <div class="activity-container">
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>시간</th>
+                <th>활동</th>
+              </tr>
+            </thead>
+            <tbody id="activityList">
+              <tr>
+                <td colspan="2">모니터링을 시작하면 활동 내역이 여기에 표시됩니다.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>모니터링 결과</h2>
+      <div id="resultsContainer">
+        <p>모니터링을 시작하면 결과가 여기에 표시됩니다.</p>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>스크린샷</h2>
+      <div id="screenshotContainer" class="screenshot-container">
+        <p>모니터링을 시작하면 캡처된 스크린샷이 여기에 표시됩니다.</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // DOM 요소
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const monitoringStatus = document.getElementById('monitoringStatus');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const totalContent = document.getElementById('totalContent');
+    const keywordFound = document.getElementById('keywordFound');
+    const startTime = document.getElementById('startTime');
+    const endTime = document.getElementById('endTime');
+    const activityList = document.getElementById('activityList');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const screenshotContainer = document.getElementById('screenshotContainer');
+    const errorContainer = document.getElementById('errorContainer');
+    
+    // 상태
+    let isMonitoring = false;
+    let statusInterval = null;
+    
+    // 날짜 포맷
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleString('ko-KR');
+    }
+    
+    // 상태 업데이트
+    function updateStatus(status) {
+      monitoringStatus.textContent = status.currentActivity || '대기 중';
+      progressBar.style.width = `${status.progress || 0}%`;
+      progressText.textContent = `${Math.round(status.progress || 0)}%`;
+      totalContent.textContent = status.results ? status.results.length : 0;
+      keywordFound.textContent = status.keywordFound || 0;
+      startTime.textContent = formatDate(status.startTime);
+      endTime.textContent = formatDate(status.endTime);
+      
+      // 활동 목록 업데이트
+      if (status.recentActivity && status.recentActivity.length > 0) {
+        activityList.innerHTML = '';
+        status.recentActivity.forEach(activity => {
+          activityList.innerHTML += `
+            <tr>
+              <td>${activity.timestamp}</td>
+              <td>${activity.action}</td>
+            </tr>
+          `;
+        });
+      }
+      
+      // 오류 표시
+      if (status.errors && status.errors.length > 0) {
+        errorContainer.style.display = 'block';
+        errorContainer.textContent = `오류: ${status.errors[status.errors.length - 1]}`;
+      } else {
+        errorContainer.style.display = 'none';
+      }
+      
+      // 결과 업데이트
+      if (status.results && status.results.length > 0) {
+        updateResults(status.results);
+      }
+      
+      // 스크린샷 업데이트
+      if (status.results && status.results.length > 0) {
+        updateScreenshots(status.results);
+      }
+    }
+    
+    // 결과 테이블 업데이트
+    function updateResults(results) {
+      if (results.length === 0) {
+        resultsContainer.innerHTML = '<p>모니터링 결과가 없습니다.</p>';
+        return;
+      }
+      
+      let html = `
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>제목</th>
+              <th>카테고리</th>
+              <th>업로더</th>
+              <th>파일 크기</th>
+              <th>키워드</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      const categoryNames = {
+        'CG001': '영화',
+        'CG002': '드라마',
+        'CG003': '동영상 및 방송',
+        'CG005': '애니'
+      };
+      
+      results.forEach(result => {
+        const title = result.containsKeyword 
+          ? result.title.replace('폭싹속았수다', '<span class="keyword-highlight">폭싹속았수다</span>')
+          : result.title;
+          
+        html += `
+          <tr>
+            <td>${title}</td>
+            <td>${categoryNames[result.genre] || result.genre}</td>
+            <td>${result.uploaderId || '-'}</td>
+            <td>${result.fileSize || '-'}</td>
+            <td>${result.containsKeyword ? '발견' : '없음'}</td>
+          </tr>
+        `;
+      });
+      
+      html += '</tbody></table>';
+      resultsContainer.innerHTML = html;
+    }
+    
+    // 스크린샷 업데이트
+    function updateScreenshots(results) {
+      if (!results.some(result => result.captureFilename)) {
+        screenshotContainer.innerHTML = '<p>캡처된 스크린샷이 없습니다.</p>';
+        return;
+      }
+      
+      let html = '';
+      
+      results.filter(result => result.captureFilename).forEach(result => {
+        html += `
+          <div class="screenshot-item">
+            <div class="screenshot-header">
+              <strong>${result.title}</strong>
+              <div>카테고리: ${result.genre === 'CG001' ? '영화' : 
+                             result.genre === 'CG002' ? '드라마' : 
+                             result.genre === 'CG003' ? '동영상 및 방송' : 
+                             result.genre === 'CG005' ? '애니' : result.genre}</div>
+            </div>
+            <img src="${result.captureFilename}" alt="${result.title}" class="screenshot-image">
+          </div>
+        `;
+      });
+      
+      screenshotContainer.innerHTML = html;
+    }
+    
+    // 모니터링 시작
+    async function startMonitoring() {
+      try {
+        startButton.disabled = true;
+        startButton.innerHTML = '<span class="loading"></span> 시작 중...';
+        
+        // 모니터링 옵션 가져오기
+        const stealthMode = document.getElementById('stealthMode').checked;
+        const pageCount = parseInt(document.getElementById('pageCount').value, 10);
+        
+        const response = await fetch('/api/monitoring/start', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            stealthMode: stealthMode,
+            pageCount: pageCount
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          isMonitoring = true;
+          startButton.disabled = true;
+          stopButton.disabled = false;
+          startButton.textContent = '모니터링 시작';
+          
+          // 상태 업데이트 폴링 시작
+          statusInterval = setInterval(fetchStatus, 2000);
+        } else {
+          throw new Error(data.message || '모니터링 시작 실패');
+        }
+      } catch (error) {
+        startButton.disabled = false;
+        startButton.textContent = '모니터링 시작';
+        errorContainer.style.display = 'block';
+        errorContainer.textContent = `오류: ${error.message}`;
+      }
+    }
+    
+    // 모니터링 중지
+    async function stopMonitoring() {
+      try {
+        stopButton.disabled = true;
+        stopButton.innerHTML = '<span class="loading"></span> 중지 중...';
+        
+        const response = await fetch('/api/monitoring/stop', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          isMonitoring = false;
+          startButton.disabled = false;
+          stopButton.disabled = true;
+          stopButton.textContent = '모니터링 중지';
+          
+          // 폴링 중지
+          clearInterval(statusInterval);
+          
+          // 마지막 상태 업데이트
+          updateStatus(data.status);
+        } else {
+          throw new Error(data.message || '모니터링 중지 실패');
+        }
+      } catch (error) {
+        stopButton.disabled = false;
+        stopButton.textContent = '모니터링 중지';
+        errorContainer.style.display = 'block';
+        errorContainer.textContent = `오류: ${error.message}`;
+      }
+    }
+    
+    // 모니터링 상태 가져오기
+    async function fetchStatus() {
+      try {
+        const response = await fetch('/api/monitoring/status');
+        const data = await response.json();
+        
+        if (data.success) {
+          updateStatus(data.status);
+          
+          // 모니터링이 완료되면 UI 업데이트
+          if (!data.isRunning && isMonitoring) {
+            isMonitoring = false;
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            clearInterval(statusInterval);
+          }
+        }
+      } catch (error) {
+        console.error('상태 가져오기 오류:', error);
+      }
+    }
+    
+    // 이벤트 리스너
+    startButton.addEventListener('click', startMonitoring);
+    stopButton.addEventListener('click', stopMonitoring);
+    
+    // 초기 상태 가져오기
+    fetchStatus();
+  </script>
+</body>
+</html>
