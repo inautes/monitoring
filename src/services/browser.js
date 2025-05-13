@@ -2,6 +2,9 @@ import puppeteer from 'puppeteer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -37,9 +40,11 @@ class BrowserService {
         const os = process.platform;
         console.log(`운영체제 감지: ${os}`);
 
-        let executablePath = this.config.chromePath;
+        let executablePath = process.env.CHROME_PATH || this.config.chromePath;
         
-        if (!executablePath) {
+        if (executablePath) {
+          console.log(`Chrome 경로 사용: ${executablePath}`);
+        } else {
           console.log('Chrome 경로를 감지하지 못했습니다. 내장 Chromium을 사용합니다.');
         }
 
