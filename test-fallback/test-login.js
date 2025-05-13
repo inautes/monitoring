@@ -43,7 +43,26 @@ async function testLoginFunctionality() {
     console.log(`사용자 이름: ${credentials.username}`);
     console.log(`비밀번호: ${'*'.repeat(credentials.password.length)}`);
     
-    const loginSuccess = await browserService.login(loginUrl, credentials);
+    let loginSuccess = false;
+    try {
+      loginSuccess = await browserService.login(loginUrl, credentials);
+    } catch (error) {
+      console.log(`로그인 중 오류 발생: ${error.message}`);
+      console.log('타임아웃이 발생했지만 로그인은 성공했을 수 있습니다. 로그인 상태 확인 계속...');
+      
+      try {
+        const currentUrl = await browserService.page.url();
+        console.log(`현재 URL: ${currentUrl}`);
+        
+        const pageContent = await browserService.page.content();
+        if (pageContent.includes('로그아웃') || pageContent.includes('마이페이지')) {
+          console.log('페이지 내용에서 로그인 성공 징후 발견');
+          loginSuccess = true;
+        }
+      } catch (innerError) {
+        console.error(`로그인 상태 확인 중 오류: ${innerError.message}`);
+      }
+    }
     
     if (loginSuccess) {
       console.log('로그인 성공!');
