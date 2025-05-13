@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import BrowserService from '../src/services/browser.js';
+import SequelizeDatabaseService from '../src/models/SequelizeDatabase.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');
@@ -17,8 +18,13 @@ async function testLoginFunctionality() {
   };
   
   const browserService = new BrowserService(browserConfig);
+  const databaseService = new SequelizeDatabaseService();
   
   try {
+    console.log('데이터베이스 초기화 중...');
+    await databaseService.initialize();
+    console.log('데이터베이스 초기화 성공');
+    
     console.log('브라우저 초기화 중...');
     await browserService.initialize();
     console.log('브라우저 초기화 성공');
@@ -84,6 +90,12 @@ async function testLoginFunctionality() {
       await browserService.close();
     }
     console.log('브라우저 종료됨');
+    
+    console.log('데이터베이스 연결 종료 중...');
+    if (databaseService) {
+      await databaseService.close();
+    }
+    console.log('데이터베이스 연결 종료됨');
   }
 }
 

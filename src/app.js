@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 
 import BrowserService from './services/browser.js';
-import DatabaseService from './models/database.js';
+import SequelizeDatabaseService from './models/SequelizeDatabase.js';
 import ScreenshotService from './services/screenshot.js';
 import FTPService from './services/ftp.js';
 import CrawlerService from './services/crawler.js';
@@ -59,7 +59,7 @@ const config = {
 class MonitoringApp {
   constructor(config) {
     this.config = config;
-    this.databaseService = new DatabaseService(config.database.path);
+    this.databaseService = new SequelizeDatabaseService(config.database.path);
     this.browserService = new BrowserService(config.browser);
     this.ftpService = new FTPService(config.ftp);
     this.screenshotService = new ScreenshotService(this.browserService);
